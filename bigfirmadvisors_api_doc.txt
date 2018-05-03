@@ -1,0 +1,76 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# BigFirmAdvisors API Documentation
+
+BigFirmAdvisors API documentation
+
+# Status Codes
+
+200 - Request completed
+
+201 - Request created resource
+
+202 - Request delete resource
+
+203 - Request updated resource
+
+400 - Bad request
+
+403 - Request forbidden
+
+404 - Request not found
+
+500 - Error Unknown
+
+
+## Apply [/apply]
+### Apply to become an Advisor [POST]
+
++ Request (application/json)
+        {
+            "name": "String",
+            "email": "String",
+            "token": "String"
+        }
+
++ Response 200 (application/json)
+
+
+## Get Projects [/projects]
+### Return all of the projects in the database [GET]
+
++ Response 200 (application/json)
+    + Body 
+            {
+                "items" : [{
+                                "id": "String",
+                                "title": "String",
+                                "body": "integer",
+                                "dateCreated": "String"
+
+                          }],
+                "itemCount": 50
+            }
+
+
+## Search Advisors [/searchadvisors]
+### Return advisors matching the requested search [POST]
+
++ Request (application/json)
+        {
+            "filterOptions": "String""
+        }
+
++ Response 200 (application/json)
+    + Body
+            {
+                "items": [{
+                                "firstName": "String",
+                                "lastName": "String",
+                                "email": "String",
+                                "occupation": "String",
+                                "industry": "String"
+                         }],
+                "itemCount": 50
+            }

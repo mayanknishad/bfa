@@ -1,0 +1,105 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+    <script type="text/javascript" src="//platform.linkedin.com/in.js">
+    api_key: 78yhypxx44ebcs
+    authorize: false
+    onLoad: onLinkedInLoad
+    </script> 
+
+    <label><div>Sign in with LinkedIn</div></label>
+    <script type="in/Login"></script>
+    <script type="text/javascript">
+        function verifyProperty(propertyName, data, undefVal="undefined"){
+            if (!(propertyName in data)) {
+                data[propertyName] = undefVal;
+            }
+        }   
+
+        function cleanDataFromLinkedIn(data){
+            verifyProperty("firstName", data);
+            verifyProperty("lastName", data);
+            verifyProperty("email", data);
+            verifyProperty("url", data);
+            verifyProperty("maidenName", data);
+            verifyProperty("formattedName", data);
+            verifyProperty("phoneticFirstName", data);
+            verifyProperty("phoneticLastName", data);
+            verifyProperty("headline", data); 
+            verifyProperty("location", data, {name: "undefined"});
+            verifyProperty("industry", data);
+            verifyProperty("summary", data);
+            verifyProperty("specialties", data);
+            verifyProperty("positions", data, {values: [{name: "undefined"}]});
+            verifyProperty("pictureUrl", data);
+            verifyProperty("pictureUrls", data, {values: ["undefined"]});
+            verifyProperty("siteStandardProfileRequest", data);
+            verifyProperty("apiStandardProfileRequest", data);
+            verifyProperty("publicProfileUrl", data);
+        }
+
+        function objectArrayStringify(givenArray){
+            var resultArray = [];
+            for (index = 0; index < givenArray.length; index++) {
+                var currentPosition = givenArray[index];
+                resultArray.push(JSON.stringify(currentPosition));
+            }
+            console.log(resultArray);
+            console.log(resultArray.toString());
+            return resultArray;
+        }
+        function createApplicantFromLinkedIn(data) {
+            cleanDataFromLinkedIn(data);
+            var stringOfJson = '{' + 
+                '"name":"' + data.firstName + ' ' + data.lastName + '",' +
+                '"email":"' + data.emailAddress + '",' +
+                '"linkedInUrl":"' + data.url + '",' +
+                '"linkedInFirstName":"' + data.firstName + '",' +
+                '"linkedInLastName":"' + data.lastName + '",' +
+                '"linkedInMaidenName":"' + data.maidenName + '",' +
+                '"linkedInFormattedName":"' + data.formattedName + '",' +
+                '"linkedInPhoneticFirstName":"' + data.phoneticFirstName + '",' +
+                '"linkedInPhoneticLastName":"' + data.phoneticLastName + '",' +
+                '"linkedInHeadline":"' + data.headline + '",' +
+                '"linkedInLocation":"' + data.location.name.toString() + '",' +
+                '"linkedInIndustry":"' + data.industry + '",' +
+                '"linkedInSummary":"' + data.summary + '",' +
+                '"linkedInSpecialties":"' + data.specialties + '",' +
+                '"linkedInPositions":"' + objectArrayStringify(data.positions.values).toString().replace(/\"/g, "") + '",' +
+                '"linkedInPictureUrl":"' + data.pictureUrl + '",' +
+                '"linkedInPictureUrlOrig":"' + data.pictureUrls.values.toString() + '",' +
+                '"linkedInSiteStandardProfileRequest":"' + data.siteStandardProfileRequest.url + '",' +
+                '"linkedInApiStandardProfileRequest":"' + data.apiStandardProfileRequest.url + '",' +
+                '"linkedInPublicProfileUrl":"' + data.publicProfileUrl + '"'
+                + '}';
+
+            console.log("Calling API with this json:\n");
+            console.log(stringOfJson);
+            var request = new XMLHttpRequest();
+            request.open("POST", "/api/apply");
+            request.setRequestHeader("Content-Type", "application/json");
+            request.send(stringOfJson);
+        }
+
+        function onLinkedInLoad() {
+            IN.Event.on(IN, "auth", getProfileData);
+        }
+
+        // Handle the successful return from the API call
+        function onSuccess(data) {
+            createApplicantFromLinkedIn(data);
+            console.log(data);
+        }
+
+        // Handle an error response from the API call
+        function onError(error) {
+            console.log(error);
+        }
+
+        // Use the API call wrapper to request the member's basic profile data
+        function getProfileData() {
+            /*TODO - pass this to our own API to create an advisor*/
+            IN.API.Raw("/people/~:(first-name,last-name,email-address,maiden-name,formatted-name,phonetic-first-name,phonetic-last-name,headline,location,industry,summary,specialties,positions,picture-url,picture-urls::(original),site-standard-profile-request,api-standard-profile-request,public-profile-url)?format=json").result(onSuccess).error(onError);
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<!-- Latest patch release (recommended for production) -->
+<script src="https://cdn.auth0.com/js/lock/10.22.0/lock.min.js"></script>
+<script type="text/javascript">
+    // Initializing our Auth0Lock
+    var options = {
+      allowSignUp: false,
+      auth: {
+        params: {
+          scope: "openid",
+          audience: 'bfa-restricted-api' // have to set this so we can use the access token for our API
+        }
+      },
+      oidcConformant: true
+    };
+
+    var lock = new Auth0Lock(
+      'SjsSCo3x1r9YguHMeYZbKaHw4Q8hiPVg',     // client ID of bfa-restricted-api client
+      'bigfirmadvisors.auth0.com',
+      options
+    );
+    // Listening for the authenticated event
+    lock.on("authenticated", function(authResult) {
+      // Use the token in authResult to getUserInfo() and save it to localStorage
+      lock.getUserInfo(authResult.accessToken, function(error, profile) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+
+        document.getElementById('nick').textContent = profile.nickname;
+
+        localStorage.setItem('accessToken', authResult.accessToken);
+
+        localStorage.setItem('profile', JSON.stringify(profile));
+      });
+    });
+
+    lock.show();
+</script>
+
+<h2>Welcome <span id="nick" class="nickname"></span></h2>
+
+{% endblock %}

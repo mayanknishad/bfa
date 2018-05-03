@@ -1,0 +1,78 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<form method="POST" action="/api/approveapplicant">
+    <label><div>Application to Approve</div></label>
+    <br>
+    <select name="Advisor Applicant" id="advisors-select">
+        {% for applicant in applicants %}
+            <option value="{{ applicant.pk_id }}">{{ applicant.first_name }} {{ applicant.last_name }} &#8212; {{ applicant.date_applied }} &#8212; {{ applicant.status }}</option>
+        {% endfor %}
+    </select>
+
+    <br>
+    <br>
+
+    <br/>
+    <br/>
+
+    <div>
+        <label><div>Welcome Message</div></label>
+        <br>
+        <textarea rows="4" cols="50" placeholder="Enter a welcome message to greet the applicant. This message will be emailed to them." name="welcomeMessage"></textarea>
+        <br>
+        <input type="submit" value="Approve">
+    </div>
+</form>
+<br>
+<br>
+<table class="table table-hover" id="advisor-details-table">
+    <thead>
+        <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+</table>
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+    var table = $('#advisor-details-table').DataTable({"pageLength": 50});
+    var API_URL = 'http://0.0.0.0:5000/admin/advisorapproval/applicants/';
+
+    $(window).load(function () {
+        var advisorId = $('#advisors-select').val();
+        loadAdvisor(advisorId);
+    });
+
+    $('#advisors-select').change(function () {
+        var advisorId = $(this).val();
+        loadAdvisor(advisorId);
+    });
+
+    function loadAdvisor(advisorId) {
+        $.ajax({
+            type: 'GET',
+            url: API_URL + advisorId,
+            dataType: 'json',
+            success: function(result) {
+                console.log(result);
+                if (result.error) {
+                    alert(result.error);
+                } else {
+                    displayApplicant(result);
+                }
+            }
+        });
+    }
+
+    function displayApplicant(applicantData) {
+        table.clear();
+        table.rows.add(Object.entries(applicantData));
+        table.draw();
+    }
+
+</script>
+
+{% endblock %}
